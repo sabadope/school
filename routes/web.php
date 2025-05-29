@@ -22,7 +22,7 @@ function set_active( $route ) {
 }
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('welcome');
 });
 
 Route::group(['middleware'=>'auth'],function()
