@@ -15,6 +15,7 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use App\Rules\MatchOldPassword;
+use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
@@ -60,20 +61,53 @@ class LoginController extends Controller
     /** login with databases */
     public function authenticate(Request $request)
     {
-        $request->validate([
-            'email'    => 'required|string',
-            'password' => 'required|string',
-        ]);
-        
-        DB::beginTransaction();
         try {
-            
-            $email     = $request->email;
-            $password  = $request->password;
+            $validator = Validator::make($request->all(), [
+                'email'    => 'required|string|email|max:255',
+                'password' => ['required', 'string', 'min:8',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+                ],
+            ], [
+                'email.required' => 'Email address is required.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.max' => 'Email address cannot exceed 255 characters.',
+                'password.required' => 'Password is required.',
+                'password.min' => 'Password must be at least 8 characters long.',
+                'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character (@$!%*?&).'
+            ]);
 
-            if (Auth::attempt(['email'=>$email,'password'=>$password])) {
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $error) {
+                    Toastr::error($error, 'Validation Error');
+                }
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+        
+            DB::beginTransaction();
+            
+            // Sanitize inputs
+            $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
+            $password = $request->password;
+
+            // Rate limiting
+            if ($this->hasTooManyLoginAttempts($request)) {
+                $seconds = $this->limiter()->availableIn(
+                    $this->throttleKey($request)
+                );
+                Toastr::error('Too many login attempts. Please try again in ' . ceil($seconds / 60) . ' minutes.','Error');
+                return redirect()->back();
+            }
+
+            if (Auth::attempt(['email' => $email, 'password' => $password])) {
+                $this->clearLoginAttempts($request);
                 /** get session */
                 $user = Auth::User();
+                
+                // Check if password needs to be updated
+                if (strlen($user->password) < 60) { // Check if password is not hashed with new algorithm
+                    Toastr::warning('Please update your password to meet new security requirements.','Warning');
+                }
+                
                 Session::put('name', $user->name);
                 Session::put('email', $user->email);
                 Session::put('user_id', $user->user_id);
@@ -87,13 +121,14 @@ class LoginController extends Controller
                 Toastr::success('Login successfully :)','Success');
                 return redirect()->route('home');
             } else {
-                Toastr::error('fail, WRONG USERNAME OR PASSWORD :)','Error');
+                $this->incrementLoginAttempts($request);
+                Toastr::error('Invalid email or password. Please check your credentials and try again.','Error');
                 return redirect('login');
             }
            
         } catch(\Exception $e) {
             DB::rollback();
-            Toastr::error('fail, LOGIN :)','Error');
+            Toastr::error('Login failed: ' . $e->getMessage(),'Error');
             return redirect()->back();
         }
     }
