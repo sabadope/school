@@ -3,8 +3,8 @@
 {{-- message --}}
 {!! Toastr::message() !!}
     <div class="login-right">
-        <div class="login-right-wrap" style="max-height: 90vh; overflow-y: auto;">
-            <h1>Sign Up</h1>
+        <div class="login-right-wrap" style="max-height: 99vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #888 #f1f1f1;">
+            <h1>Welcome to Sign Up</h1>
             <p class="account-subtitle">Enter details to create your account</p>
             <form action="{{ route('register') }}" method="POST">
                 @csrf
@@ -129,18 +129,20 @@
     </script>
     <style>
         .login-right-wrap {
-            padding-right: 15px; /* Add padding for scrollbar */
+            padding-right: 15px;
         }
         .login-right-wrap::-webkit-scrollbar {
-            width: 8px;
+            width: 4px;
         }
         .login-right-wrap::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 4px;
+            border-radius: 10px;
+            margin-left: 15px;
         }
         .login-right-wrap::-webkit-scrollbar-thumb {
             background: #888;
-            border-radius: 4px;
+            border-radius: 10px;
+            margin-left: 15px;
         }
         .login-right-wrap::-webkit-scrollbar-thumb:hover {
             background: #555;

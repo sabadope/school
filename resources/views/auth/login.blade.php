@@ -3,8 +3,8 @@
 {{-- message --}}
 {!! Toastr::message() !!}
 <div class="login-right">
-    <div class="login-right-wrap">
-        <h1>Welcome to Dashboard</h1>
+    <div class="login-right-wrap" style="max-height: 99vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #888 #f1f1f1;">
+        <h1>Welcome to Login</h1>
         <p class="account-subtitle">Need an account? <a href="{{ route('register') }}">Sign Up</a></p>
         <h2>Sign in</h2>
         <form action="{{ route('login') }}" method="POST">
@@ -44,5 +44,18 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Toggle password visibility
+    document.querySelector('.toggle-password').addEventListener('click', function() {
+        const passwordInput = document.querySelector('.pass-input');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('feather-eye');
+        this.classList.toggle('feather-eye-off');
+    });
+</script>
+@endpush
 
 @endsection

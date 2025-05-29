@@ -67,20 +67,11 @@ class LoginController extends Controller
                 'password' => ['required', 'string', 'min:8',
                     'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
                 ],
-            ], [
-                'email.required' => 'Email address is required.',
-                'email.email' => 'Please enter a valid email address.',
-                'email.max' => 'Email address cannot exceed 255 characters.',
-                'password.required' => 'Password is required.',
-                'password.min' => 'Password must be at least 8 characters long.',
-                'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character (@$!%*?&).'
             ]);
 
             if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $error) {
-                    Toastr::error($error, 'Validation Error');
-                }
-                return redirect()->back()->withErrors($validator)->withInput();
+                Toastr::error('Invalid credentials. Please check your email and password.','Error');
+                return redirect()->back()->withInput();
             }
         
             DB::beginTransaction();
@@ -94,7 +85,7 @@ class LoginController extends Controller
                 $seconds = $this->limiter()->availableIn(
                     $this->throttleKey($request)
                 );
-                Toastr::error('Too many login attempts. Please try again in ' . ceil($seconds / 60) . ' minutes.','Error');
+                Toastr::error('Invalid credentials. Please try again in ' . ceil($seconds / 60) . ' minutes.','Error');
                 return redirect()->back();
             }
 
@@ -122,13 +113,13 @@ class LoginController extends Controller
                 return redirect()->route('home');
             } else {
                 $this->incrementLoginAttempts($request);
-                Toastr::error('Invalid email or password. Please check your credentials and try again.','Error');
+                Toastr::error('Invalid credentials. Please check your email and password.','Error');
                 return redirect('login');
             }
            
         } catch(\Exception $e) {
             DB::rollback();
-            Toastr::error('Login failed: ' . $e->getMessage(),'Error');
+            Toastr::error('Invalid credentials. Please check your email and password.','Error');
             return redirect()->back();
         }
     }
