@@ -62,9 +62,23 @@ class LoginController extends Controller
     public function authenticate(Request $request)
     {
         try {
+            // Basic input sanitization
+            $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
+            $password = trim($request->password); // Remove whitespace
+
+            // Additional validation rules
             $validator = Validator::make($request->all(), [
-                'email'    => 'required|string|email|max:255',
-                'password' => ['required', 'string', 'min:8',
+                'email'    => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/' // Strict email format
+                ],
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
                     'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
                 ],
             ]);
@@ -73,12 +87,6 @@ class LoginController extends Controller
                 Toastr::error('Invalid credentials. Please check your email and password.','Error');
                 return redirect()->back()->withInput();
             }
-        
-            DB::beginTransaction();
-            
-            // Sanitize inputs
-            $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
-            $password = $request->password;
 
             // Rate limiting
             if ($this->hasTooManyLoginAttempts($request)) {
@@ -89,26 +97,41 @@ class LoginController extends Controller
                 return redirect()->back();
             }
 
-            if (Auth::attempt(['email' => $email, 'password' => $password])) {
+            // Use strict comparison and prepared statements (Laravel handles this)
+            if (Auth::attempt(['email' => $email, 'password' => $password], $request->filled('remember'))) {
                 $this->clearLoginAttempts($request);
-                /** get session */
                 $user = Auth::User();
                 
+                // Additional security check
+                if (!$user || $user->status !== 'Active') {
+                    Auth::logout();
+                    Toastr::error('Invalid credentials. Please check your email and password.','Error');
+                    return redirect('login');
+                }
+
                 // Check if password needs to be updated
-                if (strlen($user->password) < 60) { // Check if password is not hashed with new algorithm
+                if (strlen($user->password) < 60) {
                     Toastr::warning('Please update your password to meet new security requirements.','Warning');
                 }
                 
-                Session::put('name', $user->name);
-                Session::put('email', $user->email);
-                Session::put('user_id', $user->user_id);
-                Session::put('join_date', $user->join_date);
-                Session::put('phone_number', $user->phone_number);
-                Session::put('status', $user->status);
-                Session::put('role_name', $user->role_name);
-                Session::put('avatar', $user->avatar);
-                Session::put('position', $user->position);
-                Session::put('department', $user->department);
+                // Set session data
+                $sessionData = [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'user_id' => $user->user_id,
+                    'join_date' => $user->join_date,
+                    'phone_number' => $user->phone_number,
+                    'status' => $user->status,
+                    'role_name' => $user->role_name,
+                    'avatar' => $user->avatar,
+                    'position' => $user->position,
+                    'department' => $user->department
+                ];
+
+                foreach ($sessionData as $key => $value) {
+                    Session::put($key, $value);
+                }
+
                 Toastr::success('Login successfully :)','Success');
                 return redirect()->route('home');
             } else {

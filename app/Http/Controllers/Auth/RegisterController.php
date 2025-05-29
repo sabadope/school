@@ -22,42 +22,47 @@ class RegisterController extends Controller
     public function storeUser(Request $request)
     {
         try {
+            // Basic input sanitization
+            $name = trim(filter_var($request->name, FILTER_SANITIZE_STRING));
+            $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
+            $role_name = trim(filter_var($request->role_name, FILTER_SANITIZE_STRING));
+            $password = trim($request->password);
+
             $validator = Validator::make($request->all(), [
-                'name'      => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-                'email'     => 'required|string|email|max:255|unique:users',
-                'role_name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-                'password'  => ['required', 'string', 'min:8', 'confirmed',
+                'name'      => [
+                    'required',
+                    'string',
+                    'max:255',
+                    'regex:/^[a-zA-Z\s]+$/' // Only letters and spaces
+                ],
+                'email'     => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    'unique:users',
+                    'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/' // Strict email format
+                ],
+                'role_name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    'regex:/^[a-zA-Z\s]+$/', // Only letters and spaces
+                    'exists:role_type_users,role_type' // Validate role exists
+                ],
+                'password'  => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
                     'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
                 ],
-            ], [
-                'name.required' => 'Full name is required.',
-                'name.string' => 'Full name must be text.',
-                'name.max' => 'Full name cannot exceed 255 characters.',
-                'name.regex' => 'Full name can only contain letters and spaces.',
-                
-                'email.required' => 'Email address is required.',
-                'email.string' => 'Email must be text.',
-                'email.email' => 'Please enter a valid email address.',
-                'email.max' => 'Email address cannot exceed 255 characters.',
-                'email.unique' => 'This email address is already registered.',
-                
-                'role_name.required' => 'Role selection is required.',
-                'role_name.string' => 'Role must be text.',
-                'role_name.max' => 'Role name cannot exceed 255 characters.',
-                'role_name.regex' => 'Role name can only contain letters and spaces.',
-                
-                'password.required' => 'Password is required.',
-                'password.string' => 'Password must be text.',
-                'password.min' => 'Password must be at least 8 characters long.',
-                'password.confirmed' => 'Password confirmation does not match.',
-                'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character (@$!%*?&).'
             ]);
 
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 
                 // Check each password requirement
-                $password = $request->password;
                 $passwordErrors = [];
                 
                 if (strlen($password) < 8) {
@@ -94,16 +99,12 @@ class RegisterController extends Controller
             $dt = Carbon::now();
             $todayDate = $dt->toDayDateTimeString();
             
-            // Sanitize inputs
-            $name = filter_var($request->name, FILTER_SANITIZE_STRING);
-            $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
-            $role_name = filter_var($request->role_name, FILTER_SANITIZE_STRING);
-            
+            // Create user with sanitized data
             $user = new User;
             $user->name         = $name;
             $user->email        = $email;
             $user->role_name    = $role_name;
-            $user->password     = Hash::make($request->password);
+            $user->password     = Hash::make($password);
             $user->join_date    = $todayDate;
             $user->status       = 'Active';
             $user->avatar       = 'photo_defaults.jpg';
@@ -114,7 +115,7 @@ class RegisterController extends Controller
             return redirect()->route('login');
         } catch(\Exception $e) {
             DB::rollback();
-            Toastr::error('Registration failed: ' . $e->getMessage(),'Error');
+            Toastr::error('Registration failed. Please try again.','Error');
             return redirect()->back();
         }
     }
