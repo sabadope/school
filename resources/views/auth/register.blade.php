@@ -25,7 +25,15 @@
                     <select class="form-control select" name="role_name" id="role_name">
                         <option selected disabled>Role Type</option>
                         @foreach ($role as $name)
-                            <option value="{{ $name->role_type }}" {{ old('role_name') == $name->role_type ? 'selected' : '' }}>{{ $name->role_type }}</option>
+                            <option value="{{ $name->role_type }}" 
+                                {{ old('role_name') == $name->role_type ? 'selected' : '' }}
+                                {{ $name->role_type == 'Admin' ? 'disabled' : '' }}
+                                {{ $name->role_type == 'Admin' ? 'style=color:#999;' : '' }}>
+                                {{ $name->role_type }}
+                                @if($name->role_type == 'Admin')
+                                    (Already exists)
+                                @endif
+                            </option>
                         @endforeach
                     </select>
                 </div>

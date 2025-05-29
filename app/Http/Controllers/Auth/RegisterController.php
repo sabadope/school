@@ -16,7 +16,10 @@ class RegisterController extends Controller
 {
     public function register()
     {
-        $role = DB::table('role_type_users')->get();
+        // Get all roles including Admin but excluding Super Admin
+        $role = DB::table('role_type_users')
+            ->whereNotIn('role_type', ['Super Admin'])
+            ->get();
         return view('auth.register',compact('role'));
     }
     public function storeUser(Request $request)
@@ -48,7 +51,8 @@ class RegisterController extends Controller
                     'string',
                     'max:255',
                     'regex:/^[a-zA-Z\s]+$/', // Only letters and spaces
-                    'exists:role_type_users,role_type' // Validate role exists
+                    'exists:role_type_users,role_type', // Validate role exists
+                    'not_in:Admin' // Prevent admin role selection
                 ],
                 'password'  => [
                     'required',
