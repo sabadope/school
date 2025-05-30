@@ -1,4 +1,3 @@
-
 @extends('layouts.master')
 @section('content')
 {{-- message --}}
@@ -150,7 +149,7 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th>ID</th>
-                                        <th>Name</th>
+                                        <th>Icon
                                         <th class="text-center">Marks</th>
                                         <th class="text-center">Percentage</th>
                                         <th class="text-end">Year</th>
@@ -163,7 +162,7 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
+                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students">
                                             </a>
                                         </td>
                                         <td class="text-center">1185</td>
@@ -178,7 +177,7 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
+                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students">
                                             </a>
                                         </td>
                                         <td class="text-center">1195</td>
@@ -193,7 +192,7 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
+                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students">
                                             </a>
                                         </td>
                                         <td class="text-center">1196</td>
@@ -208,7 +207,7 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
+                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students">
                                             </a>
                                         </td>
                                         <td class="text-center">1187</td>
@@ -223,7 +222,7 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
+                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students">
                                             </a>
                                         </td>
                                         <td class="text-center">1185</td>
@@ -256,7 +255,7 @@
                                     <img src="assets/img/icons/award-icon-01.svg" alt="Award">
                                 </div>
                                 <div class="award-list-outs">
-                                    <h4>1st place in "Chess”</h4>
+                                    <h4>1st place in "Chess"</h4>
                                     <h5>John Doe won 1st place in "Chess"</h5>
                                 </div>
                                 <div class="award-time-list">
