@@ -20,7 +20,7 @@
                         <a class="nav-link" href="settings.html">General Settings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="localization-details.html">Localization</a>
+                        <a class="nav-link" href="{{ route('encapsulation') }}">Encapsulation</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="payment-settings.html">Payment Settings</a>
@@ -29,16 +29,13 @@
                         <a class="nav-link" href="email-settings.html">Email Settings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="social-settings.html">Social Media Login</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="social-links.html">Social Links</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="seo-settings.html">SEO Settings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="others-settings.html">Others</a>
+                        <a class="nav-link" href="others-settings.html"><strong>...</></a>
                     </li>
                 </ul>
             </div>
