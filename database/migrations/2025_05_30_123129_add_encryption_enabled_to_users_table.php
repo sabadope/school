@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'encryption_enabled')) {
-                $table->boolean('encryption_enabled')->default(false);
-            }
-        });
+        if (!Schema::hasColumn('users', 'encryption_enabled')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('encryption_enabled')->default(true);
+            });
+        }
     }
 
     /**
@@ -23,10 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'encryption_enabled')) {
+        if (Schema::hasColumn('users', 'encryption_enabled')) {
+            Schema::table('users', function (Blueprint $table) {
                 $table->dropColumn('encryption_enabled');
-            }
-        });
+            });
+        }
     }
 };

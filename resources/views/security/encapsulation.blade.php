@@ -2,23 +2,6 @@
 @section('title', 'Encapsulation Example')
 
 @section('content')
-<style>
-    .encryption-loading {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 255, 255, 0.9);
-        padding: 10px 20px;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 1000;
-    }
-    .card-body {
-        position: relative;
-    }
-</style>
-
 <div class="page-wrapper">
     <div class="content container-fluid">
         <div class="page-header">
@@ -215,7 +198,7 @@
 
     // Encryption Toggle Functionality
     $(document).ready(function() {
-        // Initially encrypt all data
+        // Initial state - encrypted
         $('.encryptable').each(function() {
             const originalText = $(this).data('original');
             const hash = CryptoJS.SHA256(originalText).toString();
@@ -224,60 +207,16 @@
 
         $('#encryptionToggle').change(function() {
             const isDecrypted = $(this).is(':checked');
-            const $toggle = $(this);
             
-            // Disable the toggle while processing
-            $toggle.prop('disabled', true);
-            
-            // Show loading state
-            $toggle.closest('.card-body').append('<div class="encryption-loading">Updating encryption...</div>');
-            
-            // Make AJAX call to update encryption status
-            $.ajax({
-                url: '{{ route("setting.toggle.encryption") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    enabled: isDecrypted
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Show success message
-                        toastr.success(response.message);
-                        // Reload the page to reflect changes
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1000);
-                    } else {
-                        // Show error message from server
-                        toastr.error(response.message || 'Error updating encryption status');
-                        // Revert the toggle
-                        $toggle.prop('checked', !isDecrypted);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error toggling encryption:', xhr);
-                    // Get error message from response if available
-                    let errorMessage = 'Error updating encryption status';
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.message) {
-                            errorMessage = response.message;
-                        }
-                    } catch (e) {
-                        console.error('Error parsing error response:', e);
-                    }
-                    
-                    // Show error message
-                    toastr.error(errorMessage);
-                    // Revert the toggle
-                    $toggle.prop('checked', !isDecrypted);
-                },
-                complete: function() {
-                    // Re-enable the toggle
-                    $toggle.prop('disabled', false);
-                    // Remove loading state
-                    $('.encryption-loading').remove();
+            $('.encryptable').each(function() {
+                const originalText = $(this).data('original');
+                if (isDecrypted) {
+                    // Show original text when toggle is ON
+                    $(this).text(originalText);
+                } else {
+                    // Show hash when toggle is OFF
+                    const hash = CryptoJS.SHA256(originalText).toString();
+                    $(this).text(hash.substring(0, 16) + '...');
                 }
             });
         });

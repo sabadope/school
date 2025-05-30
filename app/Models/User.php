@@ -29,7 +29,6 @@ class User extends Authenticatable
         'position',
         'department',
         'password',
-        'encryption_enabled'
     ];
 
     /**
@@ -49,7 +48,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'encryption_enabled' => 'boolean',
     ];
 
     protected static function boot()
@@ -70,46 +68,5 @@ class User extends Authenticatable
                 $model->user_id = '000' . sprintf("%03s", $nextID);
             }
         });
-    }
-
-    // Accessor to decrypt data when encryption is disabled
-    public function getNameAttribute($value)
-    {
-        return $this->encryption_enabled ? $value : $this->decryptData($value);
-    }
-
-    public function getEmailAttribute($value)
-    {
-        return $this->encryption_enabled ? $value : $this->decryptData($value);
-    }
-
-    public function getRoleNameAttribute($value)
-    {
-        return $this->encryption_enabled ? $value : $this->decryptData($value);
-    }
-
-    public function getDepartmentAttribute($value)
-    {
-        return $this->encryption_enabled ? $value : $this->decryptData($value);
-    }
-
-    public function getPositionAttribute($value)
-    {
-        return $this->encryption_enabled ? $value : $this->decryptData($value);
-    }
-
-    // Helper method to decrypt data
-    private function decryptData($value)
-    {
-        // Since we're using SHA-256 (one-way hash), we can't decrypt
-        // Instead, we'll return a placeholder when encryption is disabled
-        return '[Encrypted]';
-    }
-
-    // Method to toggle encryption
-    public function toggleEncryption($enabled)
-    {
-        $this->encryption_enabled = $enabled;
-        $this->save();
     }
 }

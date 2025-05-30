@@ -181,7 +181,7 @@
                             <a class="nav-link" href="#features">Features</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('apply') }}" class="btn btn-primary">
+                            <a href="{{ route('login') }}" class="btn btn-primary">
                                 <i class="bi bi-mortarboard" style="margin-right: 5px;"></i> Apply Now
                             </a>
                         </li>
@@ -198,7 +198,7 @@
                         <h1 class="display-4 fw-bold mb-4">Welcome to TCU-Connect</h1>
                         <p class="lead mb-5">Connect, Learn, and Grow Together</p>
                         <div class="d-flex gap-3">
-                            <a href="{{ route('apply') }}" class="btn btn-primary btn-lg">Get Started</a>
+                            <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Get Started</a>
                             <a href="#features" class="btn btn-outline-primary btn-lg">Learn More</a>
                         </div>
                     </div>
@@ -278,7 +278,7 @@
                         <ul class="footer-links">
                             <li><a href="#home">Home</a></li>
                             <li><a href="#features">Features</a></li>
-                            <li><a href="{{ route('apply') }}">Apply Now</a></li>
+                            <li><a href="{{ route('login') }}">Apply Now</a></li>
                         </ul>
                     </div>
                     <div class="col-lg-4">
