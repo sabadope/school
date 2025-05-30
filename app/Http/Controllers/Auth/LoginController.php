@@ -62,109 +62,92 @@ class LoginController extends Controller
     public function authenticate(Request $request)
     {
         try {
-            // Basic input sanitization
             $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
-            $password = trim($request->password); // Remove whitespace
+            $password = trim($request->password);
 
-            // Additional validation rules
             $validator = Validator::make($request->all(), [
-                'email'    => [
+                'email' => [
                     'required',
                     'string',
                     'email',
-                    'max:255',
-                    'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/' // Strict email format
+                    'max:255'
                 ],
                 'password' => [
                     'required',
                     'string',
-                    'min:8',
-                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+                    'min:6'
                 ],
             ]);
 
             if ($validator->fails()) {
-                Toastr::error('Invalid credentials. Please check your email and password.','Error');
+                $errors = $validator->errors();
+                if ($errors->has('email')) {
+                    Toastr::error('Please enter a valid email address.','Error');
+                } elseif ($errors->has('password')) {
+                    Toastr::error('Password must be at least 6 characters.','Error');
+                }
                 return redirect()->back()->withInput();
             }
 
-            // Rate limiting
             if ($this->hasTooManyLoginAttempts($request)) {
                 $seconds = $this->limiter()->availableIn(
                     $this->throttleKey($request)
                 );
-                Toastr::error('Invalid credentials. Please try again in ' . ceil($seconds / 60) . ' minutes.','Error');
+                Toastr::error('Too many login attempts. Please try again in ' . ceil($seconds / 60) . ' minutes.','Error');
                 return redirect()->back();
             }
 
-            // Use strict comparison and prepared statements (Laravel handles this)
             if (Auth::attempt(['email' => $email, 'password' => $password], $request->filled('remember'))) {
                 $this->clearLoginAttempts($request);
                 $user = Auth::User();
                 
-                // Additional security check
                 if (!$user || $user->status !== 'Active') {
                     Auth::logout();
-                    Toastr::error('Invalid credentials. Please check your email and password.','Error');
+                    Toastr::error('Your account is not active. Please contact administrator.','Error');
                     return redirect('login');
                 }
-
-                // Check if password needs to be updated
-                if (strlen($user->password) < 60) {
-                    Toastr::warning('Please update your password to meet new security requirements.','Warning');
-                }
                 
-                // Set session data
+                // Set session data only if values exist
                 $sessionData = [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'user_id' => $user->user_id,
-                    'join_date' => $user->join_date,
-                    'phone_number' => $user->phone_number,
-                    'status' => $user->status,
-                    'role_name' => $user->role_name,
-                    'avatar' => $user->avatar,
-                    'position' => $user->position,
-                    'department' => $user->department
+                    'name' => $user->name ?? '',
+                    'email' => $user->email ?? '',
+                    'user_id' => $user->user_id ?? '',
+                    'join_date' => $user->join_date ?? '',
+                    'phone_number' => $user->phone_number ?? '',
+                    'status' => $user->status ?? '',
+                    'role_name' => $user->role_name ?? '',
+                    'avatar' => $user->avatar ?? '',
+                    'position' => $user->position ?? '',
+                    'department' => $user->department ?? ''
                 ];
 
                 foreach ($sessionData as $key => $value) {
-                    Session::put($key, $value);
+                    if ($value !== null) {
+                        Session::put($key, $value);
+                    }
                 }
 
-                Toastr::success('Login successfully :)','Success');
+                Toastr::success('Login successful! Welcome back, ' . $user->name,'Success');
                 return redirect()->route('home');
             } else {
                 $this->incrementLoginAttempts($request);
-                Toastr::error('Invalid credentials. Please check your email and password.','Error');
+                Toastr::error('Invalid email or password. Please try again.','Error');
                 return redirect('login');
             }
            
         } catch(\Exception $e) {
             DB::rollback();
-            Toastr::error('Invalid credentials. Please check your email and password.','Error');
+            Toastr::error('An error occurred during login. Please try again.','Error');
             return redirect()->back();
         }
     }
 
     /** logout */
-    public function logout( Request $request)
+    public function logout(Request $request)
     {
         Auth::logout();
-        // forget login session
-        $request->session()->forget('name');
-        $request->session()->forget('email');
-        $request->session()->forget('user_id');
-        $request->session()->forget('join_date');
-        $request->session()->forget('phone_number');
-        $request->session()->forget('status');
-        $request->session()->forget('role_name');
-        $request->session()->forget('avatar');
-        $request->session()->forget('position');
-        $request->session()->forget('department');
         $request->session()->flush();
-
-        Toastr::success('Logout successfully :)','Success');
+        Toastr::success('Logout successful!','Success');
         return redirect('login');
     }
 

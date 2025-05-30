@@ -11,15 +11,21 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        // Create default admin user
+        // Delete existing admin user if exists
+        User::where('email', 'admin@gmail.com')->delete();
+
+        // Create new admin user with complete information
         User::create([
-            'name' => 'Admin',
+            'name' => 'System Administrator',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('Admin123!'),
-            'role_name' => 'Admin',
-            'join_date' => Carbon::now()->toDayDateTimeString(),
             'status' => 'Active',
-            'avatar' => 'photo_defaults.jpg'
+            'role_name' => 'admin',
+            'join_date' => Carbon::now()->toDayDateTimeString(),
+            'phone_number' => '+1234567890',
+            'avatar' => 'photo_defaults.jpg',
+            'position' => 'System Administrator',
+            'department' => 'Administration',
         ]);
     }
 } 
